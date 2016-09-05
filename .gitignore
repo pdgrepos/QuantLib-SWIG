@@ -1,3 +1,6 @@
+# Swig executable
+swigwin/
+
 # Compilation artifacts
 configure
 aclocal.m4

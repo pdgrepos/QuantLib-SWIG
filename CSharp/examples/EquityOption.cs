@@ -411,6 +411,10 @@ namespace EquityOptionTest
             Console.WriteLine();
             Console.WriteLine("Run completed in {0} s", delta.TotalSeconds);
             Console.WriteLine();
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+
         }
 
         private static void ReportParameters(Option.Type optionType,

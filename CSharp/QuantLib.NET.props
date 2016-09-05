@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <DistributionDir>$(SolutionDir)_libs_</DistributionDir>
+  </PropertyGroup>
+  <PropertyGroup Label="UserMacros">
+    <QL_DIR Condition="'$(QL_DIR)' == ''">$(SolutionDir)\..\..\QuantLibAddin-Old\QuantLib</QL_DIR>
+    <BOOST_ROOT Condition="'$(BOOST_ROOT)' == ''">$(SolutionDir)\..\..\..\PDG_Projects\Boost\boost_1_52_0</BOOST_ROOT>
+    <BOOST_INCLUDES>$(BOOST_ROOT)</BOOST_INCLUDES>
+    <BOOST_LIBS32>$(BOOST_ROOT)\stage\lib</BOOST_LIBS32>
+    <BOOST_LIBS64>$(BOOST_ROOT)\stage\win64\lib</BOOST_LIBS64>
+  </PropertyGroup>
+</Project>
