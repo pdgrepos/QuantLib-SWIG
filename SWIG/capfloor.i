@@ -40,19 +40,48 @@ typedef boost::shared_ptr<Instrument> CollarPtr;
 class CapFloorPtr : public boost::shared_ptr<Instrument> {
     #if defined(SWIGMZSCHEME) || defined(SWIGGUILE)
     %rename("implied-volatility") impliedVolatility;
+    %rename("floating-leg") floatingLeg;
+    %rename("cap-rates") capRates;
+    %rename("floor-rates") floorRates;
+    %rename("start-date") startDate;
+    %rename("maturity-date") maturityDate;
+    %rename("atm-rate") atmRate;
     #endif
   public:
      %extend {
         Volatility impliedVolatility(Real price,
-                                     const Handle<YieldTermStructure>& curve,
+                                     const Handle<YieldTermStructure>& disc,
                                      Volatility guess,
                                      Real accuracy = 1.0e-4,
-                                     Size maxEvaluations = 100,
+                                     Natural maxEvaluations = 100,
                                      Volatility minVol = 1.0e-7,
-                                     Volatility maxVol = 4.0) const {
+                                     Volatility maxVol = 4.0,
+                                     VolatilityType type = ShiftedLognormal,
+                                     Real displacement = 0.0) const {
             return boost::dynamic_pointer_cast<CapFloor>(*self)->
-                impliedVolatility(price, curve, guess, accuracy,
-                                  maxEvaluations, minVol, maxVol);
+                impliedVolatility(price, disc, guess, accuracy,
+                                  maxEvaluations, minVol, maxVol,
+                                  type, displacement);
+        }
+        const Leg& floatingLeg() const {
+            return boost::dynamic_pointer_cast<CapFloor>(*self)->floatingLeg();
+        }
+
+        const std::vector<Rate>& capRates() const {
+            return boost::dynamic_pointer_cast<CapFloor>(*self)->capRates();
+        }
+        const std::vector<Rate>& floorRates() const {
+            return boost::dynamic_pointer_cast<CapFloor>(*self)->floorRates();
+        }
+        Date startDate() const {
+            return boost::dynamic_pointer_cast<CapFloor>(*self)->startDate();
+        }
+        Date maturityDate() const {
+            return boost::dynamic_pointer_cast<CapFloor>(*self)->maturityDate();
+        }
+
+        Rate atmRate(const boost::shared_ptr<YieldTermStructure>& discountCurve) const {
+            return boost::dynamic_pointer_cast<CapFloor>(*self)->atmRate(*discountCurve);
         }
     }
 };
@@ -117,5 +146,28 @@ class BlackCapFloorEnginePtr : public boost::shared_ptr<PricingEngine> {
     }
 };
 
+%{
+using QuantLib::BachelierCapFloorEngine;
+typedef boost::shared_ptr<PricingEngine> BachelierCapFloorEnginePtr;
+%}
+
+%rename(BachelierCapFloorEngine) BachelierCapFloorEnginePtr;
+class BachelierCapFloorEnginePtr : public boost::shared_ptr<PricingEngine> {
+  public:
+    %extend {
+        BachelierCapFloorEnginePtr(
+                           const Handle<YieldTermStructure>& termStructure,
+                           const Handle<Quote>& vol) {
+            return new BachelierCapFloorEnginePtr(
+                                new BachelierCapFloorEngine(termStructure,vol));
+        }
+        BachelierCapFloorEnginePtr(
+                           const Handle<YieldTermStructure>& termStructure,
+                           const Handle<OptionletVolatilityStructure>& vol) {
+            return new BachelierCapFloorEnginePtr(
+                                new BachelierCapFloorEngine(termStructure,vol));
+        }
+    }
+};
 
 #endif

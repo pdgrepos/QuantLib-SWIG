@@ -3,6 +3,7 @@
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
  Copyright (C) 2003, 2004, 2005, 2006, 2007 StatPro Italia srl
  Copyright (C) 2015 Matthias Groncki
+ Copyright (C) 2016 Peter Caspers
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -404,6 +405,11 @@ class Name##Ptr : public SwapIndexPtr {
                                     Handle<YieldTermStructure>()) {
           return new Name##Ptr(new Name(tenor,h));
       }
+      Name##Ptr(const Period &tenor,
+                const Handle<YieldTermStructure>& h1,
+                const Handle<YieldTermStructure>& h2) {
+          return new Name##Ptr(new Name(tenor,h1,h2));
+      }
     }
 };
 %enddef
@@ -421,6 +427,10 @@ class Name##Ptr : public Base##Ptr {
                                     Handle<YieldTermStructure>()) {
           return new Name##Ptr(new Name(h));
       }
+      Name##Ptr(const Handle<YieldTermStructure>& h1,
+                const Handle<YieldTermStructure>& h2) {
+          return new Name##Ptr(new Name(h1,h2));
+      }
     }
 };
 %enddef
@@ -432,6 +442,22 @@ export_xibor_instance(CADLibor);
 export_xibor_instance(Cdor);
 export_xibor_instance(CHFLibor);
 export_xibor_instance(DKKLibor);
+
+export_xibor_instance(Bbsw);
+export_quoted_xibor_instance(Bbsw1M,Bbsw);
+export_quoted_xibor_instance(Bbsw2M,Bbsw);
+export_quoted_xibor_instance(Bbsw3M,Bbsw);
+export_quoted_xibor_instance(Bbsw4M,Bbsw);
+export_quoted_xibor_instance(Bbsw5M,Bbsw);
+export_quoted_xibor_instance(Bbsw6M,Bbsw);
+
+export_xibor_instance(Bkbm);
+export_quoted_xibor_instance(Bkbm1M,Bkbm);
+export_quoted_xibor_instance(Bkbm2M,Bkbm);
+export_quoted_xibor_instance(Bkbm3M,Bkbm);
+export_quoted_xibor_instance(Bkbm4M,Bkbm);
+export_quoted_xibor_instance(Bkbm5M,Bkbm);
+export_quoted_xibor_instance(Bkbm6M,Bkbm);
 
 export_xibor_instance(Euribor);
 export_quoted_xibor_instance(EuriborSW,Euribor);
@@ -493,9 +519,11 @@ export_xibor_instance(TRLibor);
 export_xibor_instance(USDLibor);
 export_xibor_instance(Zibor);
 
+export_overnight_instance(Aonia);
 export_overnight_instance(Eonia);
 export_overnight_instance(Sonia);
 export_overnight_instance(FedFunds);
+export_overnight_instance(Nzocr);
 
 export_swap_instance(EuriborSwapIsdaFixA);
 export_swap_instance(EuriborSwapIsdaFixB);

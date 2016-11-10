@@ -1,6 +1,7 @@
 
 /*
  Copyright (C) 2013 Simon Shakeshaft
+ Copyright (C) 2016 Gouthaman Balaraman
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -30,7 +31,9 @@ using QuantLib::BondFunctions;
 %}
 
 class BondFunctions {
-    #if defined(SWIGMZSCHEME) || defined(SWIGGUILE)
+    #if defined(SWIGPYTHON) || defined (SWIGRUBY)
+    %rename(bondYield) yield;
+    #elif defined(SWIGMZSCHEME) || defined(SWIGGUILE)
     %rename("start-date")                 startDate;
     %rename("maturity-date")              maturityDate;
     %rename("is-tradeable")               isTradable;
@@ -44,6 +47,9 @@ class BondFunctions {
     %rename("accrual-end-date")           accrualEndDate;
     %rename("accrual-period")             accrualPeriod;
     %rename("accrual-days")               accrualDays;
+    %rename("accrued-period")             accruedPeriod;
+    %rename("accrued-days")               accruedDays;
+    %rename("accrued-amount")             accruedAmount;
     %rename("clean-price")                cleanPrice;
     %rename("atm-rate")                   atmRate;
     %rename("basis-point-value")          basisPointValue;
@@ -126,6 +132,26 @@ class BondFunctions {
                     *(boost::dynamic_pointer_cast<Bond>(bond)),
                     settlementDate);
         }
+        static Time accruedPeriod(const BondPtr& bond,
+                                  Date settlementDate = Date()) {
+            return QuantLib::BondFunctions::accruedPeriod(
+                *(boost::dynamic_pointer_cast<Bond>(bond)),
+                settlementDate);
+        }
+        static BigInteger accruedDays(const BondPtr& bond,
+                                      Date settlementDate = Date()) {
+            return QuantLib::BondFunctions::accruedDays(
+                *(boost::dynamic_pointer_cast<Bond>(bond)),
+                settlementDate);
+        }
+        static Real accruedAmount(const BondPtr& bond,
+                                  Date settlementDate = Date()){
+        
+            return QuantLib::BondFunctions::accruedAmount(
+                *(boost::dynamic_pointer_cast<Bond>(bond)), 
+                settlementDate);
+        }
+        
         static Real cleanPrice(
                    const BondPtr& bond,
                    const boost::shared_ptr<YieldTermStructure>& discountCurve,
@@ -334,6 +360,7 @@ class BondFunctions {
                         guess);
             
         }
+        
     }
 };
 
