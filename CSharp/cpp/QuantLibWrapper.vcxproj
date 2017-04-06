@@ -57,7 +57,7 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <Import Project="$(SolutionDir)\$(SolutionName).props" />
+  <Import Project="$(SolutionDir)\$(SolutionName).props" Condition="Exists('$(SolutionDir)\$(SolutionName).props')" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
