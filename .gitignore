@@ -81,7 +81,7 @@ testCaseCollection.xml
 *.ipch
 
 # Outputs
-CSharp/csharp/*.cs
+CSharp/csharp/generated/
 CSharp/NQuantLib.dll
 Guile/QuantLib.scm
 Java/QuantLib.jar

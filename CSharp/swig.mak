@@ -15,7 +15,7 @@ SWIG_DIR = $(TOPDIR)\SWIG
 SWIG_SRC = $(SWIG_DIR)\quantlib.i
 PRJ_DIR = $(TOPDIR)\CSharp
 CPP_WRAPPER = $(PRJ_DIR)\cpp\quantlib_wrap.cpp
-CS_DIR = $(PRJ_DIR)\csharp
+CS_DIR = $(PRJ_DIR)\csharp\generated
 NAMESPACE = QuantLib
 
 MK_DEPS = $(SWIG_DIR)\*.i $(PRJ_DIR)\swig.mak
@@ -23,4 +23,7 @@ MK_DEPS = $(SWIG_DIR)\*.i $(PRJ_DIR)\swig.mak
 all: $(CPP_WRAPPER)
 
 $(CPP_WRAPPER): $(MK_DEPS)
+  @if not exist $(CS_DIR) mkdir $(CS_DIR)
+  @del /s /q $(CS_DIR) > NUL
+  @echo Generating swig files...
   @$(SWIG_EXE) -csharp -c++ -outdir $(CS_DIR) -namespace $(NAMESPACE) $(SWIG_DLLIMPORT) -o $@ $(SWIG_SRC)
