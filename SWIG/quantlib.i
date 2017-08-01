@@ -21,6 +21,7 @@
 #if defined(SWIGRUBY)
 %module QuantLibc
 #elif defined(SWIGCSHARP)
+%typemap(csclassmodifiers) SWIGTYPE "public partial class"
 %module(directors="1") NQuantLibc
 #elif defined(SWIGJAVA)
 %module(directors="1") QuantLib
