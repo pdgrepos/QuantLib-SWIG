@@ -5,9 +5,11 @@
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
     <QL_DIR Condition="'$(QL_DIR)' == ''">$(SolutionDir)\..\..\QuantLibAddin-Old\QuantLib</QL_DIR>
-    <BOOST_ROOT Condition="'$(BOOST_ROOT)' == ''">$(SolutionDir)\..\..\..\PDG_Projects\Boost\boost_1_52_0</BOOST_ROOT>
-    <BOOST_INCLUDES>$(BOOST_ROOT)</BOOST_INCLUDES>
-    <BOOST_LIBS32>$(BOOST_ROOT)\stage\lib</BOOST_LIBS32>
-    <BOOST_LIBS64>$(BOOST_ROOT)\stage\win64\lib</BOOST_LIBS64>
+    <BOOST_ROOT Condition="'$(BOOST_ROOT)' == ''">$(SolutionDir)\..\..\..\PDG_Projects\Boost</BOOST_ROOT>
+    <BOOST_VER Condition="'$(BOOST_VER)' == ''">1_65_1</BOOST_VER>
+    <BOOST_BASE>$(BOOST_ROOT)\boost_$(BOOST_VER)</BOOST_BASE>
+    <BOOST_INCLUDES>$(BOOST_BASE)</BOOST_INCLUDES>
+    <BOOST_LIBS32>$(BOOST_BASE)\stage\lib</BOOST_LIBS32>
+    <BOOST_LIBS64>$(BOOST_BASE)\stage\win64\lib</BOOST_LIBS64>
   </PropertyGroup>
 </Project>
