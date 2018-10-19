@@ -2,7 +2,7 @@
 /*
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
  Copyright (C) 2016 Peter Caspers
- Copyright (C) 2017 Matthias Lungwitz
+ Copyright (C) 2017, 2018 Matthias Lungwitz
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -76,7 +76,7 @@ class NonstandardSwaptionPtr : public boost::shared_ptr<Instrument> {
             return new NonstandardSwaptionPtr(new NonstandardSwaption(swap,exercise,type));
         }
 
-        std::vector<boost::shared_ptr<CalibrationHelper> > calibrationBasket(
+        std::vector<boost::shared_ptr<CalibrationHelperBase> > calibrationBasket(
             boost::shared_ptr<Index> standardSwapBase,
             boost::shared_ptr<SwaptionVolatilityStructure> swaptionVolatility,
             std::string typeStr) {
@@ -90,8 +90,23 @@ class NonstandardSwaptionPtr : public boost::shared_ptr<Instrument> {
                 QL_FAIL("type " << typeStr << "unknown.");
             boost::shared_ptr<SwapIndex> swapIndex =
                 boost::dynamic_pointer_cast<SwapIndex>(standardSwapBase);
-            return boost::dynamic_pointer_cast<NonstandardSwaption>(*self)->
+            std::vector<boost::shared_ptr<BlackCalibrationHelper> > hs =
+                boost::dynamic_pointer_cast<NonstandardSwaption>(*self)->
                 calibrationBasket(swapIndex, swaptionVolatility, type);
+            std::vector<boost::shared_ptr<CalibrationHelperBase> > helpers(hs.size());
+            for (Size i=0; i<hs.size(); ++i)
+                helpers[i] = hs[i];
+            return helpers;
+        }
+
+		const NonstandardSwapPtr underlyingSwap() const {
+			return boost::dynamic_pointer_cast<NonstandardSwaption>(*self)->
+                underlyingSwap();
+		}
+
+		std::vector<Real> probabilities() {
+            return boost::dynamic_pointer_cast<NonstandardSwaption>(*self)
+                ->result<std::vector<Real> >("probabilities");
         }
     }
 };
@@ -108,7 +123,7 @@ class FloatFloatSwaptionPtr : public boost::shared_ptr<Instrument> {
             return new FloatFloatSwaptionPtr(new FloatFloatSwaption(swap,exercise));
         }
 
-        std::vector<boost::shared_ptr<CalibrationHelper> > calibrationBasket(
+        std::vector<boost::shared_ptr<CalibrationHelperBase> > calibrationBasket(
             boost::shared_ptr<Index> standardSwapBase,
             boost::shared_ptr<SwaptionVolatilityStructure> swaptionVolatility,
             std::string typeStr) {
@@ -122,12 +137,28 @@ class FloatFloatSwaptionPtr : public boost::shared_ptr<Instrument> {
                 QL_FAIL("type " << typeStr << "unknown.");
             boost::shared_ptr<SwapIndex> swapIndex =
                 boost::dynamic_pointer_cast<SwapIndex>(standardSwapBase);
-            return boost::dynamic_pointer_cast<FloatFloatSwaption>(*self)->
+            std::vector<boost::shared_ptr<BlackCalibrationHelper> > hs =
+                boost::dynamic_pointer_cast<FloatFloatSwaption>(*self)->
                 calibrationBasket(swapIndex, swaptionVolatility, type);
+            std::vector<boost::shared_ptr<CalibrationHelperBase> > helpers(hs.size());
+            for (Size i=0; i<hs.size(); ++i)
+                helpers[i] = hs[i];
+            return helpers;
         }
 
         Real underlyingValue() {
-            return boost::dynamic_pointer_cast<FloatFloatSwaption>(*self)->result<Real>("underlyingValue");
+            return boost::dynamic_pointer_cast<FloatFloatSwaption>(*self)
+                ->result<Real>("underlyingValue");
+        }
+
+		const FloatFloatSwapPtr underlyingSwap() const {
+			return boost::dynamic_pointer_cast<FloatFloatSwaption>(*self)->
+                underlyingSwap();
+		}
+
+		std::vector<Real> probabilities() {
+            return boost::dynamic_pointer_cast<FloatFloatSwaption>(*self)
+                ->result<std::vector<Real> >("probabilities");
         }
     }
 };

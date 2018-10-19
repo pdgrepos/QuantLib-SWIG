@@ -1,7 +1,7 @@
 
 /*
  Copyright (C) 2014 Matthias Groncki
- Copyright (C) 2017 Matthias Lungwitz
+ Copyright (C) 2017, 2018 Matthias Lungwitz
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -29,7 +29,6 @@
 
 %{
 using QuantLib::Gaussian1dModel;
-
 %}
 
 %ignore Gaussian1dModel;
@@ -110,21 +109,29 @@ class GsrPtr : public boost::shared_ptr<Gaussian1dModel> {
         }
         
         void calibrateVolatilitiesIterative(
-                const std::vector<boost::shared_ptr<CalibrationHelper> > &helpers,
+                const std::vector<boost::shared_ptr<CalibrationHelperBase> > &hs,
                 OptimizationMethod &method, const EndCriteria &endCriteria,
                 const Constraint &constraint = Constraint(),
                 const std::vector<Real> &weights = std::vector<Real>()) {
+            std::vector<boost::shared_ptr<BlackCalibrationHelper> > helpers(hs.size());
+            for (Size i=0; i<hs.size(); ++i)
+                helpers[i] =
+                    boost::dynamic_pointer_cast<BlackCalibrationHelper>(hs[i]);
             boost::dynamic_pointer_cast<Gsr>(*self)
                 ->calibrateVolatilitiesIterative(helpers, method, endCriteria,
                                                  constraint, weights);
         }
         
         void calibrate(
-            const std::vector<boost::shared_ptr<CalibrationHelper> >& helpers,
-            OptimizationMethod& method, const EndCriteria & endCriteria,
-            const Constraint& constraint = Constraint(),
-            const std::vector<Real>& weights = std::vector<Real>(),
-            const std::vector<bool> & fixParameters = std::vector<bool>()){
+                const std::vector<boost::shared_ptr<CalibrationHelperBase> >& hs,
+                OptimizationMethod& method, const EndCriteria & endCriteria,
+                const Constraint& constraint = Constraint(),
+                const std::vector<Real>& weights = std::vector<Real>(),
+                const std::vector<bool> & fixParameters = std::vector<bool>()) {
+            std::vector<boost::shared_ptr<BlackCalibrationHelper> > helpers(hs.size());
+            for (Size i=0; i<hs.size(); ++i)
+                helpers[i] =
+                    boost::dynamic_pointer_cast<BlackCalibrationHelper>(hs[i]);
             boost::dynamic_pointer_cast<Gsr>(*self)
                 ->calibrate(helpers, method, endCriteria,
                             constraint, weights, fixParameters);
@@ -134,7 +141,11 @@ class GsrPtr : public boost::shared_ptr<Gaussian1dModel> {
             return boost::dynamic_pointer_cast<Gsr>(*self)->params();
         }
         Real value(const Array& params,
-                   const std::vector<boost::shared_ptr<CalibrationHelper> >& helpers){
+                   const std::vector<boost::shared_ptr<CalibrationHelperBase> >& hs) {
+            std::vector<boost::shared_ptr<BlackCalibrationHelper> > helpers(hs.size());
+            for (Size i=0; i<hs.size(); ++i)
+                helpers[i] =
+                    boost::dynamic_pointer_cast<BlackCalibrationHelper>(hs[i]);
             return boost::dynamic_pointer_cast<Gsr>(*self)->value(params, helpers);
         }
         EndCriteria::Type endCriteria() const{
@@ -251,13 +262,18 @@ class MarkovFunctionalPtr : public boost::shared_ptr<Gaussian1dModel> {
         }
 
         void calibrate(
-              const std::vector<boost::shared_ptr<CalibrationHelper> > &helper,
+              const std::vector<boost::shared_ptr<CalibrationHelperBase> > &hs,
               OptimizationMethod &method, const EndCriteria &endCriteria,
               const Constraint &constraint = Constraint(),
               const std::vector<Real> &weights = std::vector<Real>(),
               const std::vector<bool> &fixParameters = std::vector<bool>()) {
-            boost::dynamic_pointer_cast<MarkovFunctional>(*self)->calibrate(helper, method, 
-                                                                            endCriteria, constraint, weights, fixParameters);
+            std::vector<boost::shared_ptr<BlackCalibrationHelper> > helpers(hs.size());
+            for (Size i=0; i<hs.size(); ++i)
+                helpers[i] =
+                    boost::dynamic_pointer_cast<BlackCalibrationHelper>(hs[i]);
+            boost::dynamic_pointer_cast<MarkovFunctional>(*self)->calibrate(helpers, method, 
+                                                                            endCriteria, constraint,
+                                                                            weights, fixParameters);
         }
 
         const Array& volatility() const {
@@ -282,19 +298,37 @@ typedef boost::shared_ptr<PricingEngine> Gaussian1dNonstandardSwaptionEnginePtr;
 typedef boost::shared_ptr<PricingEngine> Gaussian1dFloatFloatSwaptionEnginePtr;
 %}
 
+#if defined(SWIGJAVA) || defined(SWIGCSHARP)
+%rename(_Gaussian1dSwaptionEngine) Gaussian1dSwaptionEngine;
+#else
+%ignore Gaussian1dSwaptionEngine;
+#endif
+class Gaussian1dSwaptionEngine {
+  public:
+    enum Probabilities { None, Naive, Digital };
+#if defined(SWIGJAVA) || defined(SWIGCSHARP)
+  private:
+    Gaussian1dSwaptionEngine();
+#endif
+};
+
 %rename(Gaussian1dSwaptionEngine) Gaussian1dSwaptionEnginePtr;
 class Gaussian1dSwaptionEnginePtr : public boost::shared_ptr<PricingEngine> {
   public:
     %extend {
+	static const Gaussian1dSwaptionEngine::Probabilities None = Gaussian1dSwaptionEngine::None;
+	static const Gaussian1dSwaptionEngine::Probabilities Naive = Gaussian1dSwaptionEngine::Naive;
+	static const Gaussian1dSwaptionEngine::Probabilities Digital = Gaussian1dSwaptionEngine::Digital;
 
     Gaussian1dSwaptionEnginePtr(const boost::shared_ptr<Gaussian1dModel> &model,
             const int integrationPoints = 64, const Real stddevs = 7.0,
             const bool extrapolatePayoff = true,
             const bool flatPayoffExtrapolation = false,
             const Handle<YieldTermStructure> &discountCurve =
-                Handle<YieldTermStructure>()) {
+                Handle<YieldTermStructure>(),
+			const Gaussian1dSwaptionEngine::Probabilities probabilities = Gaussian1dSwaptionEngine::None) {
             return new Gaussian1dSwaptionEnginePtr(new Gaussian1dSwaptionEngine(model, integrationPoints, 
-                    stddevs, extrapolatePayoff, flatPayoffExtrapolation, discountCurve));
+                    stddevs, extrapolatePayoff, flatPayoffExtrapolation, discountCurve, probabilities));
         }
     
     }
@@ -312,10 +346,28 @@ class Gaussian1dJamshidianSwaptionEnginePtr : public boost::shared_ptr<PricingEn
     }
 };
 
+#if defined(SWIGJAVA) || defined(SWIGCSHARP)
+%rename(_Gaussian1dNonstandardSwaptionEngine) Gaussian1dNonstandardSwaptionEngine;
+#else
+%ignore Gaussian1dNonstandardSwaptionEngine;
+#endif
+class Gaussian1dNonstandardSwaptionEngine {
+  public:
+    enum Probabilities { None, Naive, Digital };
+#if defined(SWIGJAVA) || defined(SWIGCSHARP)
+  private:
+    Gaussian1dNonstandardSwaptionEngine();
+#endif
+};
+
 %rename(Gaussian1dNonstandardSwaptionEngine) Gaussian1dNonstandardSwaptionEnginePtr;
 class Gaussian1dNonstandardSwaptionEnginePtr : public boost::shared_ptr<PricingEngine> {
   public:
     %extend {
+
+	static const Gaussian1dNonstandardSwaptionEngine::Probabilities None = Gaussian1dNonstandardSwaptionEngine::None;
+	static const Gaussian1dNonstandardSwaptionEngine::Probabilities Naive = Gaussian1dNonstandardSwaptionEngine::Naive;
+	static const Gaussian1dNonstandardSwaptionEngine::Probabilities Digital = Gaussian1dNonstandardSwaptionEngine::Digital;
 
     Gaussian1dNonstandardSwaptionEnginePtr(
             const boost::shared_ptr<Gaussian1dModel> &model,
@@ -326,9 +378,10 @@ class Gaussian1dNonstandardSwaptionEnginePtr : public boost::shared_ptr<PricingE
                                                         // compounded w.r.t. yts
                                                         // daycounter
             const Handle<YieldTermStructure> &discountCurve =
-                Handle<YieldTermStructure>()) {
+                Handle<YieldTermStructure>(),
+				const Gaussian1dNonstandardSwaptionEngine::Probabilities probabilities = Gaussian1dNonstandardSwaptionEngine::None) {
             return new Gaussian1dNonstandardSwaptionEnginePtr(new Gaussian1dNonstandardSwaptionEngine(model, integrationPoints, 
-                    stddevs, extrapolatePayoff, flatPayoffExtrapolation, oas, discountCurve));
+                    stddevs, extrapolatePayoff, flatPayoffExtrapolation, oas, discountCurve, probabilities));
         }
     
     }

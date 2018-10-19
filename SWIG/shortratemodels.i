@@ -34,7 +34,7 @@ using QuantLib::ShortRateModel;
 
 %ignore ShortRateModel;
 class ShortRateModel {
-    #if defined(SWIGMZSCHEME) || defined(SWIGGUILE) || defined(SWIGRUBY)
+    #if defined(SWIGRUBY)
     %rename("calibrate!") calibrate;
     #elif defined(SWIGCSHARP)
     %rename("parameters") params;
@@ -42,13 +42,13 @@ class ShortRateModel {
   public:
     Array params() const;
     void calibrate(
-        const std::vector<boost::shared_ptr<CalibrationHelper> >&,
+        const std::vector<boost::shared_ptr<CalibrationHelperBase> >&,
         OptimizationMethod&, const EndCriteria &,
         const Constraint& constraint = Constraint(),
         const std::vector<Real>& weights = std::vector<Real>(),
         const std::vector<bool> & fixParameters = std::vector<bool>());
     Real value(const Array& params,
-               const std::vector<boost::shared_ptr<CalibrationHelper> >&);
+               const std::vector<boost::shared_ptr<CalibrationHelperBase> >&);
     EndCriteria::Type endCriteria() const;
     void setParams(const Array& params);
 };

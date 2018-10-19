@@ -1,42 +1,46 @@
 
-Changes for QuantLib-SWIG 1.11
-==============================
+Main changes for QuantLib-SWIG 1.14
+===================================
 
-The most notable changes are included below.
-A detailed list of changes is available in ChangeLog.txt and at
-<https://github.com/lballabio/QuantLib-SWIG/milestone/4?closed=1>.
+More details on the changes are available in ChangeLog.txt and at
+<https://github.com/lballabio/QuantLib-SWIG/milestone/7?closed=1>.
 
-- This is the last release to include bindings (which are probably
-  broken anyway) for the Guile, MzScheme and OCaml languages.
+- Dropped support for Visual Studio 2008.
 
-- Upgraded to SWIG 3.0.12.
+- Exported the Calendar::holidayList method (thanks to Piotr Siejda).
 
-- Exported BlackDeltaCalculator class, blackFormula and related
-  functions (thanks to Wojciech Ślusarski).
+- Exported Thailand calendar (thanks to Matthias Groncki).
 
-- Exported discountBond method for short-rate models (thanks to
-  Goutham Balaraman).
-
-- Exported Hull-White forward process (thanks to Wojciech Ślusarski).
-
-- Exported volatility type and displacement to
-  ConstantOptionletVolatility constructors (thanks to Matthias
-  Lungwitz).
-
-- Exported SwaptionVolCube1 inspectors (thanks to Matthias Lungwitz).
-
-- Exported full Schedule constructor based on dates (thanks to
+- Exported the InterpolatedSurvivalProbabilityCurve class (thanks to
   Matthias Lungwitz).
 
-- Avoid errors building Python 3.5 wrappers (thanks to Alan Donoghue
-  for the heads-up).
+- Exported the SmileSection base class and a few derived classes
+  (thanks to Matthias Lungwitz).
 
-- Exported FD G2 and Hull-White swaption engines (thanks to Matthias
-  Lungwitz).
+- Exported Bibor and THBFIX indices (thanks to Matthias Groncki).
 
-- Exported Bates vanilla engine (thanks to GitHub user abhilaksh12).
+- Exported the force_overwrite parameter from the Index::addFixing
+  method (thanks to Wojciech Slusarski).
 
-- Added to the Python Date class conversion methods to and from
-  datetime instances.
+- Exported CMS-spread coupons and leg (thanks to Matthias Lungwitz).
 
-- Added callable-bond example in Java (thanks to Bojan Nikolic).
+- Added protection start date argument to CreditDefaultSwap
+  constructor (thanks to GitHub user pschaefers).
+
+- Exported the MakeVanillaSwap class (thanks to Matthias Groncki).
+
+- Exported the IsdaCdsEngine class and added Python example (thanks to
+  Weston Steimel and GitHub user aliallday).
+
+- Exported the COSHestonEngine class (thanks to Klaus Spanderen).
+
+- Exported the SwingOption class and related classes and added Python
+  and Scala examples (thanks to Klaus Spanderen).
+
+- Added Python example for Gaussian 1D model (thanks to Angus Lee).
+
+- Added option to use the AutoCloseable interface in the Java wrappers
+  instead of finalizers.  Use the `--enable-java-autocloseable`
+  configure switch to enable the interface.  The separate switch
+  `--disable-java-finalizer` disables finalizers entirely, and should
+  be used with caution.

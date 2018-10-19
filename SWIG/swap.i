@@ -4,7 +4,8 @@
  Copyright (C) 2011 Lluis Pujol Bajador
  Copyright (C) 2015 Gouthaman Balaraman
  Copyright (C) 2016 Peter Caspers
- Copyright (C) 2017 Matthias Lungwitz
+ Copyright (C) 2017, 2018 Matthias Lungwitz
+ Copyright (C) 2018 Matthias Groncki
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -27,19 +28,24 @@
 %include termstructures.i
 %include cashflows.i
 %include timebasket.i
+%include indexes.i
+%include bonds.i
 
 %{
 using QuantLib::Swap;
 using QuantLib::VanillaSwap;
+using QuantLib::MakeVanillaSwap;
 using QuantLib::NonstandardSwap;
 using QuantLib::DiscountingSwapEngine;
 using QuantLib::FloatFloatSwap;
+using QuantLib::OvernightIndexedSwap;
 
 typedef boost::shared_ptr<Instrument> SwapPtr;
 typedef boost::shared_ptr<Instrument> VanillaSwapPtr;
 typedef boost::shared_ptr<Instrument> NonstandardSwapPtr;
 typedef boost::shared_ptr<PricingEngine> DiscountingSwapEnginePtr;
 typedef boost::shared_ptr<Instrument> FloatFloatSwapPtr;
+typedef boost::shared_ptr<Instrument> OvernightIndexedSwapPtr;
 %}
 
 %rename(Swap) SwapPtr;
@@ -82,22 +88,6 @@ class VanillaSwap {
 
 %rename(VanillaSwap) VanillaSwapPtr;
 class VanillaSwapPtr : public SwapPtr {
-    #if defined(SWIGMZSCHEME) || defined(SWIGGUILE)
-    %rename("fair-rate")        fairRate;
-    %rename("fair-spread")      fairSpread;
-    %rename("fixed-leg-BPS")    fixedLegBPS;
-    %rename("floating-leg-BPS") floatingLegBPS;
-    %rename ("fixed-leg-NPV") fixedLegNPV;
-    %rename ("floating-leg-NPV") floatingLegNPV;
-    %rename ("floating-leg") floatingLeg;
-    %rename ("fixed-leg") fixedLeg;
-    %rename ("fixed-schedule") fixedSchedule;
-    %rename ("floating-schedule") floatingSchedule;
-    %rename ("fixed-rate") fixedRate;
-    %rename ("fixed-day-count") fixedDayCount;
-    %rename ("floating-day-count") floatingDayCount;
-    
-    #endif
   public:
     %extend {
         static const VanillaSwap::Type Receiver = VanillaSwap::Receiver;
@@ -179,6 +169,138 @@ class VanillaSwapPtr : public SwapPtr {
     }
 };
 
+
+#if defined(SWIGPYTHON)
+%rename (_MakeVanillaSwap) MakeVanillaSwap;
+#endif
+class MakeVanillaSwap {
+      public:
+        MakeVanillaSwap& receiveFixed(bool flag = true);
+        MakeVanillaSwap& withType(VanillaSwap::Type type);
+        MakeVanillaSwap& withNominal(Real n);
+
+        MakeVanillaSwap& withSettlementDays(Natural settlementDays);
+        MakeVanillaSwap& withEffectiveDate(const Date&);
+        MakeVanillaSwap& withTerminationDate(const Date&);
+        MakeVanillaSwap& withRule(DateGeneration::Rule r);
+
+        MakeVanillaSwap& withFixedLegTenor(const Period& t);
+        MakeVanillaSwap& withFixedLegCalendar(const Calendar& cal);
+        MakeVanillaSwap& withFixedLegConvention(BusinessDayConvention bdc);
+        MakeVanillaSwap& withFixedLegTerminationDateConvention(
+                                                   BusinessDayConvention bdc);
+        MakeVanillaSwap& withFixedLegRule(DateGeneration::Rule r);
+        MakeVanillaSwap& withFixedLegEndOfMonth(bool flag = true);
+        MakeVanillaSwap& withFixedLegFirstDate(const Date& d);
+        MakeVanillaSwap& withFixedLegNextToLastDate(const Date& d);
+        MakeVanillaSwap& withFixedLegDayCount(const DayCounter& dc);
+
+        MakeVanillaSwap& withFloatingLegTenor(const Period& t);
+        MakeVanillaSwap& withFloatingLegCalendar(const Calendar& cal);
+        MakeVanillaSwap& withFloatingLegConvention(BusinessDayConvention bdc);
+        MakeVanillaSwap& withFloatingLegTerminationDateConvention(
+                                                   BusinessDayConvention bdc);
+        MakeVanillaSwap& withFloatingLegRule(DateGeneration::Rule r);
+        MakeVanillaSwap& withFloatingLegEndOfMonth(bool flag = true);
+        MakeVanillaSwap& withFloatingLegFirstDate(const Date& d);
+        MakeVanillaSwap& withFloatingLegNextToLastDate(const Date& d);
+        MakeVanillaSwap& withFloatingLegDayCount(const DayCounter& dc);
+        MakeVanillaSwap& withFloatingLegSpread(Spread sp);
+
+        MakeVanillaSwap& withDiscountingTermStructure(
+                              const Handle<YieldTermStructure>& discountCurve);
+        MakeVanillaSwap& withPricingEngine(
+                              const boost::shared_ptr<PricingEngine>& engine);
+        %extend{
+            SwapPtr makeVanillaSwap(){
+                return (boost::shared_ptr<VanillaSwap>)(* $self);
+            }
+            MakeVanillaSwap(const Period& swapTenor,
+                        const IborIndexPtr& iborIndex,
+                        Rate fixedRate,
+                        const Period& forwardStart){
+                boost::shared_ptr<IborIndex> index = boost::dynamic_pointer_cast<IborIndex>(iborIndex);
+                return new MakeVanillaSwap(swapTenor, index, fixedRate, forwardStart);
+            };
+        }
+};
+
+
+#if defined(SWIGPYTHON)
+%pythoncode{
+def MakeVanillaSwap(swapTenor,iborIndex,fixedRate,forwardStart,
+    receiveFixed=None, swapType=None, Nominal=None, settlementDays=None,
+    effectiveDate=None, terminationDate=None, dateGenerationRule=None,
+    fixedLegTenor=None, fixedLegCalendar=None, fixedLegConvention=None,
+    fixedLegDayCount=None, floatingLegTenor=None, floatingLegCalendar=None,
+    floatingLegConvention=None, floatingLegDayCount=None, floatingLegSpread=None,
+    discountingTermStructure=None, pricingEngine=None,
+    fixedLegTerminationDateConvention=None,  fixedLegDateGenRule=None,
+    fixedLegEndOfMonth=None, fixedLegFirstDate=None, fixedLegNextToLastDate=None,
+    floatingLegTerminationDateConvention=None,  floatingLegDateGenRule=None,
+    floatingLegEndOfMonth=None, floatingLegFirstDate=None, floatingLegNextToLastDate=None):
+    mv = _MakeVanillaSwap(swapTenor, iborIndex, fixedRate, forwardStart)
+    if receiveFixed is not None:
+        mv.receiveFixed(receiveFixed)
+    if swapType is not None:
+        mv.withType(swapType)
+    if Nominal is not None:
+        mv.withNominal(Nominal)
+    if settlementDays is not None:
+        mv.withSettlementDays(settlementDays)
+    if effectiveDate is not None:
+        mv.withEffectiveDate(effectiveDate)
+    if terminationDate is not None:
+        mv.withTerminationDate(terminationDate)
+    if dateGenerationRule is not None:
+        mv.withRule(dateGenerationRule)
+    if fixedLegTenor is not None:
+        mv.withFixedLegTenor(fixedLegTenor)
+    if fixedLegCalendar is not None:
+        mv.withFixedLegCalendar(fixedLegCalendar)
+    if fixedLegConvention is not None:
+        mv.withFixedLegConvention(fixedLegConvention)
+    if fixedLegDayCount is not None:
+        mv.withFixedLegDayCount(fixedLegDayCount)
+    if floatingLegTenor is not None:
+        mv.withFloatingLegTenor(floatingLegTenor)
+    if floatingLegCalendar is not None:
+        mv.withFloatingLegCalendar(floatingLegCalendar)
+    if floatingLegConvention is not None:
+        mv.withFloatingLegConvention(floatingLegConvention)
+    if floatingLegDayCount is not None:
+        mv.withFloatingLegDayCount(floatingLegDayCount)
+    if floatingLegSpread is not None:
+        mv.withFloatingLegSpread(floatingLegSpread)
+    if discountingTermStructure is not None:
+        mv.withDiscountingTermStructure(discountingTermStructure)
+    if pricingEngine is not None:
+        mv.withPricingEngine(pricingEngine)
+    if fixedLegTerminationDateConvention is not None:
+        mv.withFixedLegTerminationDateConvention(fixedLegTerminationDateConvention)
+    if fixedLegDateGenRule is not None:
+        mv.withFixedLegRule(fixedLegDateGenRule)
+    if fixedLegEndOfMonth is not None:
+        mv.withFixedLegEndOfMonth(fixedLegEndOfMonth)
+    if fixedLegFirstDate is not None:
+        mv.withFixedLegFirstDate(fixedLegFirstDate)
+    if fixedLegNextToLastDate is not None:
+        mv.withFixedLegNextToLastDate(fixedLegNextToLastDate)
+    if floatingLegTerminationDateConvention is not None:
+        mv.withFloatingLegTerminationDateConvention(floatingLegTerminationDateConvention)
+    if floatingLegDateGenRule is not None:
+        mv.withFloatingLegRule(floatingLegDateGenRule)
+    if floatingLegEndOfMonth is not None:
+        mv.withFloatingLegEndOfMonth(floatingLegEndOfMonth)
+    if floatingLegFirstDate is not None:
+        mv.withFloatingLegFirstDate(floatingLegFirstDate)
+    if floatingLegNextToLastDate is not None:
+        mv.withFloatingLegNextToLastDate(floatingLegNextToLastDate)
+    return mv.makeVanillaSwap()
+}
+#endif
+
+
 #if defined(SWIGJAVA) || defined(SWIGCSHARP)
 %rename(_NonstandardSwap) NonstandardSwap;
 #else
@@ -194,17 +316,6 @@ class NonstandardSwap {
 
 %rename(NonstandardSwap) NonstandardSwapPtr;
 class NonstandardSwapPtr : public SwapPtr {
-    #if defined(SWIGMZSCHEME) || defined(SWIGGUILE)
-    %rename ("floating-leg")       floatingLeg;
-    %rename ("fixed-leg")          fixedLeg;
-    %rename ("floating-nominals")  floatingNominals;
-    %rename ("fixed-nominals")     fixedNominals;
-    %rename ("fixed-schedule")     fixedSchedule;
-    %rename ("floating-schedule")  floatingSchedule;
-    %rename ("fixed-rate")         fixedRate;
-    %rename ("fixed-day-count")    fixedDayCount;
-    %rename ("floating-day-count") floatingDayCount;
-    #endif
   public:
     %extend {
         NonstandardSwapPtr(VanillaSwap::Type type,
@@ -383,6 +494,128 @@ class FloatFloatSwapPtr : public SwapPtr {
                                     paymentConvention1, paymentConvention2));
         }
 
+    }
+};
+
+#if defined(SWIGJAVA) || defined(SWIGCSHARP)
+%rename(_OvernightIndexedSwap) OvernightIndexedSwap;
+#else
+%ignore OvernightIndexedSwap;
+#endif
+class OvernightIndexedSwap {
+  public:
+    enum Type { Receiver = -1, Payer = 1 };
+#if defined(SWIGJAVA) || defined(SWIGCSHARP)
+  private:
+    OvernightIndexedSwap();
+#endif
+};
+
+%rename(OvernightIndexedSwap) OvernightIndexedSwapPtr;
+class OvernightIndexedSwapPtr : public SwapPtr {
+  public:
+    %extend {
+        static const OvernightIndexedSwap::Type Receiver = OvernightIndexedSwap::Receiver;
+        static const OvernightIndexedSwap::Type Payer = OvernightIndexedSwap::Payer;
+		
+		OvernightIndexedSwapPtr(
+				OvernightIndexedSwap::Type type,
+				Real nominal,
+				const Schedule& schedule,
+				Rate fixedRate,
+				const DayCounter& fixedDC,
+				const OvernightIndexPtr& overnightIndex,
+				Spread spread = 0.0,
+				Natural paymentLag = 0,
+				BusinessDayConvention paymentAdjustment = Following,
+				Calendar paymentCalendar = Calendar(),
+				bool telescopicValueDates = false) {
+				boost::shared_ptr<OvernightIndex> index =
+					boost::dynamic_pointer_cast<OvernightIndex>(overnightIndex);
+				return new OvernightIndexedSwapPtr(
+				 new OvernightIndexedSwap(type, nominal, schedule, fixedRate, fixedDC,
+				index, spread, paymentLag, paymentAdjustment, paymentCalendar, telescopicValueDates));
+		}
+		
+		OvernightIndexedSwapPtr(
+				OvernightIndexedSwap::Type type,
+				std::vector<Real> nominals,
+				const Schedule& schedule,
+				Rate fixedRate,
+				const DayCounter& fixedDC,
+				const OvernightIndexPtr& overnightIndex,
+				Spread spread = 0.0,
+				Natural paymentLag = 0,
+				BusinessDayConvention paymentAdjustment = Following,
+				Calendar paymentCalendar = Calendar(),
+				bool telescopicValueDates = false) {
+				boost::shared_ptr<OvernightIndex> index =
+					boost::dynamic_pointer_cast<OvernightIndex>(overnightIndex);
+				return new OvernightIndexedSwapPtr(
+				 new OvernightIndexedSwap(type, nominals, schedule, fixedRate, fixedDC,
+				index, spread, paymentLag, paymentAdjustment, paymentCalendar, telescopicValueDates));
+		}
+
+
+        Rate fixedLegBPS() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap>(*self)->fixedLegBPS();
+        }
+        Real fixedLegNPV() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap>(*self)
+                 ->fixedLegNPV();
+        }
+        Real fairRate() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap>(*self)
+                 ->fairRate();
+        }
+        Real overnightLegBPS() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap>(*self)
+                 ->overnightLegBPS();
+        }
+        Real overnightLegNPV() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->overnightLegNPV();
+        }
+        Spread fairSpread() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->fairSpread();
+        }
+        // Inspectors
+		OvernightIndexedSwap::Type type() {
+			return boost::dynamic_pointer_cast<OvernightIndexedSwap>(*self)->type();
+		}
+        Real nominal() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->nominal();
+        }
+		std::vector<Real> nominals() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->nominals();
+        }
+		Frequency paymentFrequency() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->paymentFrequency();
+        }
+		Rate fixedRate() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->fixedRate();
+        }
+		const DayCounter& fixedDayCount() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->fixedDayCount();
+        }
+		Spread spread() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->spread();
+        }
+        const Leg& fixedLeg() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->fixedLeg();
+        }
+        const Leg& overnightLeg() {
+            return boost::dynamic_pointer_cast<OvernightIndexedSwap> (*self)
+                ->overnightLeg();
+        }
     }
 };
 

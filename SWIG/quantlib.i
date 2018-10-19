@@ -30,9 +30,6 @@
 #endif
 
 %include exception.i
-#if defined(SWIGMZSCHEME)
-%include std_except.i
-#endif
 
 %exception {
     try {
@@ -69,20 +66,23 @@ const char* __version__;
 %}
 #endif
 
-#if defined(SWIGGUILE)
-// code for loading shared library
-%scheme%{
-    (define (load-quantlibc-in path)
-      (if (null? path)
-          (error "QuantLibc.so not found")
-          (let ((so-name (string-append (car path) "/QuantLibc.so")))
-            (if (file-exists? so-name)
-                (dynamic-call
-                 "scm_init_QuantLib_module"
-                 (dynamic-link so-name))
-                (load-quantlibc-in (cdr path))))))
-    (load-quantlibc-in %load-path)
+
+#if defined(JAVA_AUTOCLOSEABLE)
+%typemap(javaimports) SWIGTYPE %{
+import java.lang.AutoCloseable;
 %}
+%typemap(javainterfaces) SWIGTYPE "AutoCloseable";
+%typemap(javacode) SWIGTYPE %{
+  @Override
+  public void close() {
+   this.delete();
+  }
+%}
+#endif
+
+
+#if !defined(JAVA_FINALIZER)
+%typemap(javafinalize) SWIGTYPE %{%}
 #endif
 
 //#if defined(SWIGPYTHON)
