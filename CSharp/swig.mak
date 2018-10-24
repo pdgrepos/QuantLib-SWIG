@@ -15,7 +15,7 @@ SWIG_DIR = $(TOPDIR)\SWIG
 SWIG_SRC = $(SWIG_DIR)\quantlib.i
 PRJ_DIR = $(TOPDIR)\CSharp
 CPP_WRAPPER = $(PRJ_DIR)\cpp\quantlib_wrap.cpp
-CS_DIR = $(PRJ_DIR)\csharp\generated
+CS_DIR = $(PRJ_DIR)\csharp\generated\$(ARCH)
 NAMESPACE = QuantLib
 
 DONE = $(CS_DIR)\.done

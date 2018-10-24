@@ -100,7 +100,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PreBuildEvent>
-      <Command>nmake -f ..\swig.mak TOPDIR=..\.. DLLIMPORT=$(TargetName)$(TargetExt)</Command>
+      <Command>nmake -f ..\swig.mak TOPDIR=..\.. ARCH=$(Platform) DLLIMPORT=$(TargetName)$(TargetExt)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -133,7 +133,7 @@ xcopy $(TargetPath) $(DistributionDir)\$(Configuration) /d /y
       </DataExecutionPrevention>
     </Link>
     <PreBuildEvent>
-      <Command>nmake -f ..\swig.mak TOPDIR=..\.. DLLIMPORT=$(TargetName)$(TargetExt)</Command>
+      <Command>nmake -f ..\swig.mak TOPDIR=..\.. ARCH=$(Platform) DLLIMPORT=$(TargetName)$(TargetExt)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -168,7 +168,7 @@ xcopy $(TargetPath) $(DistributionDir)\$(Configuration) /d /y
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PreBuildEvent>
-      <Command>nmake -f ..\swig.mak TOPDIR=..\.. DLLIMPORT=$(TargetName)$(TargetExt)</Command>
+      <Command>nmake -f ..\swig.mak TOPDIR=..\.. ARCH=$(Platform) DLLIMPORT=$(TargetName)$(TargetExt)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -202,7 +202,7 @@ xcopy $(TargetPath) $(DistributionDir)\$(Configuration) /d /y
       </DataExecutionPrevention>
     </Link>
     <PreBuildEvent>
-      <Command>nmake -f ..\swig.mak TOPDIR=..\.. DLLIMPORT=$(TargetName)$(TargetExt)</Command>
+      <Command>nmake -f ..\swig.mak TOPDIR=..\.. ARCH=$(Platform) DLLIMPORT=$(TargetName)$(TargetExt)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
