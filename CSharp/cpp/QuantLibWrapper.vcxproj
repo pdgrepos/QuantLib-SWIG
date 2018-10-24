@@ -23,6 +23,7 @@
     <ProjectGuid>{21183104-9963-4D4F-B7E8-C8A6169FD053}</ProjectGuid>
     <RootNamespace>NQuantLibc</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="../QuantLib.props" />
